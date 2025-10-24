@@ -75,7 +75,7 @@ public class MusicPlayerGUI extends JFrame {
 
         // Load Song Item
         JMenuItem loadSong = new JMenuItem("Load Song");
-        loadSong.setForeground(TEXT_COLOR);
+        loadSong.setForeground(TEXT_BLACK_COLOR);
         loadSong.addActionListener(e -> { // Using lambda for concise action listener
             int result = jFileChooser.showOpenDialog(MusicPlayerGUI.this);
             File selectedFile = jFileChooser.getSelectedFile();
