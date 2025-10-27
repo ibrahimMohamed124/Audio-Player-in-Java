@@ -25,9 +25,14 @@ public class MusicPlayerGUI extends JFrame {
     private JLabel labelCurrentTime, labelEnd; // Renamed for clarity in the class scope
     private JLabel songImage; // get song image
 
+    // Buttons Paths
+    public String prevBtn = "src/assets/drive-download-20250713T123450Z-1-001/previous.png";
+    public String playBtn = "src/assets/drive-download-20250713T123450Z-1-001/play.png";
+    public String pauseBtn = "src/assets/drive-download-20250713T123450Z-1-001/pause.png";
+    public String nextBtn = "src/assets/drive-download-20250713T123450Z-1-001/next.png";
+
 
     // Assuming Song class is defined elsewhere
-
     public MusicPlayerGUI() {
         super("Modern Music Player 🎵");
 
@@ -100,11 +105,19 @@ public class MusicPlayerGUI extends JFrame {
         // Simple Playlist Menu (keeping structure but simplifying implementation)
         JMenu playlistMenu = new JMenu("Playlist");
         playlistMenu.setForeground(TEXT_COLOR);
-        playlistMenu.add(new JMenuItem("Create Playlist"));
-        playlistMenu.add(new JMenuItem("Load Playlist"));
 
         menuBar.add(songMenu);
         menuBar.add(playlistMenu);
+
+        // addToolBar()
+        JMenuItem createPlaylist = new JMenuItem("Create Playlist");
+        createPlaylist.addActionListener(e -> new PlaylistUI().setVisible(true));
+
+        JMenuItem loadPlaylist = new JMenuItem("Load Playlist");
+        loadPlaylist.addActionListener(e -> new PlaylistUI().setVisible(true));
+
+        playlistMenu.add(createPlaylist);
+        playlistMenu.add(loadPlaylist);
 
         // Add the menu bar to the top (North) of the frame
         setJMenuBar(menuBar);
@@ -186,10 +199,10 @@ public class MusicPlayerGUI extends JFrame {
         playbackBtns.setBackground(COMPONENT_BACKGROUND);
 
         // Reusing original button setup logic but with modern styling
-        JButton previousBtn = createStyledButton("src/assets/drive-download-20250713T123450Z-1-001/previous.png");
-        JButton playButton = createStyledButton("src/assets/drive-download-20250713T123450Z-1-001/play.png");
-        JButton pauseButton = createStyledButton("src/assets/drive-download-20250713T123450Z-1-001/pause.png");
-        JButton nextButton = createStyledButton("src/assets/drive-download-20250713T123450Z-1-001/next.png");
+        JButton previousBtn = createStyledButton(prevBtn);
+        JButton playButton = createStyledButton(playBtn);
+        JButton pauseButton = createStyledButton(pauseBtn);
+        JButton nextButton = createStyledButton(nextBtn);
 
         // Action Listeners
         playButton.addActionListener(e -> {
@@ -247,7 +260,7 @@ public class MusicPlayerGUI extends JFrame {
         }
     }
 
-    private void updateSongTitleAndArtist(Song song) {
+    void updateSongTitleAndArtist(Song song) {
         songTitle.setText(song.getSongTitle());
         songArtist.setText(song.getSongArtist());
 
@@ -262,7 +275,7 @@ public class MusicPlayerGUI extends JFrame {
     }
 
 
-    private void updatePlaybackSlider(Song song) {
+    void updatePlaybackSlider(Song song) {
         // Set Max and ensure labels are painted
         playbackSlider.setMaximum(song.getMp3File().getFrameCount());
         playbackSlider.setPaintLabels(false); // We are using separate labels (labelCurrentTime, labelEnd) now

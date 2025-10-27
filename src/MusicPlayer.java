@@ -1,13 +1,15 @@
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
-
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MusicPlayer extends PlaybackListener {
      private MusicPlayerGUI musicPlayerGUI;
      private Song currentSong;
+     private List<Song> playlist = new ArrayList<>();
+     private int currentIndex = 0;
 
      private AdvancedPlayer advancedPlayer;
      private Thread musicThread;
@@ -21,6 +23,18 @@ public class MusicPlayer extends PlaybackListener {
      public MusicPlayer(MusicPlayerGUI musicPlayerGUI) {
           this.musicPlayerGUI = musicPlayerGUI;
      }
+
+     public void setPlaylist(List<String> songPaths) {
+          playlist.clear();
+          for (String path : songPaths) {
+               playlist.add(new Song(path));
+          }
+          currentIndex = 0;
+          if (!playlist.isEmpty()) {
+               loadSong(playlist.get(0));
+          }
+     }
+
 
      public void loadSong(Song song) {
           stopSong();
@@ -69,15 +83,16 @@ public class MusicPlayer extends PlaybackListener {
                          e.printStackTrace();
                     }
                });
-
                musicThread.start();
+
                startPlaybackSliderThread();
+               musicPlayerGUI.updateSongTitleAndArtist(currentSong);
+               musicPlayerGUI.updatePlaybackSlider(currentSong);
 
           } catch (Exception e) {
                e.printStackTrace();
           }
      }
-
 
      private void startPlaybackSliderThread() {
           new Thread(() -> {
@@ -101,15 +116,27 @@ public class MusicPlayer extends PlaybackListener {
           return isPlaying;
      }
 
+     public void nextSong() {
+          if (playlist.isEmpty()) return;
+          currentIndex = (currentIndex + 1) % playlist.size();
+          loadSong(playlist.get(currentIndex));
+     }
+
+     public void previousSong() {
+          if (playlist.isEmpty()) return;
+          currentIndex = (currentIndex - 1 + playlist.size()) % playlist.size();
+          loadSong(playlist.get(currentIndex));
+     }
+
      @Override
      public void playbackFinished(PlaybackEvent evt) {
           if (isPaused) {
                currentFrame = evt.getFrame();
                System.out.println("Paused at frame: " + currentFrame);
           } else {
-               System.out.println("Finished at frame: " + evt.getFrame() + "/" + totalFrames);
                currentFrame = 0;
                isPlaying = false;
+               nextSong();
           }
      }
 }

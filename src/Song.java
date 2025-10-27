@@ -33,7 +33,7 @@ public class Song {
                 songTitle = tag.getFirst(FieldKey.TITLE);
                 songArtist = tag.getFirst(FieldKey.ARTIST);
 
-                // قراءة صورة الألبوم (Album Art)
+                // (Album Art)
                 var artwork = tag.getFirstArtwork();
                 if (artwork != null) {
                     byte[] imageData = artwork.getBinaryData();
