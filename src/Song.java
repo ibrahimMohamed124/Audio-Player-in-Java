@@ -16,14 +16,13 @@ public class Song {
     private BufferedImage albumArt;
     private final String filePAth;
     private Mp3File mp3File;
-    private double frameRatePerMillisecond;
 
     public Song(String filePAth){
         this.filePAth = filePAth;
         try {
             mp3File = new Mp3File(new File(filePAth));
             songLength = convertToSongLengthFormat();
-            frameRatePerMillisecond = (double) mp3File.getFrameCount() / mp3File.getLengthInMilliseconds();
+            double frameRatePerMillisecond = (double) mp3File.getFrameCount() / mp3File.getLengthInMilliseconds();
 
             AudioFile audioFile = AudioFileIO.read(new File(filePAth));
 
@@ -63,7 +62,7 @@ public class Song {
 
     public String getSongLength(){return songLength;}
 
-    public String getFilePAth(){return filePAth;}
+    public String getFilePath(){return filePAth;}
 
     public Mp3File getMp3File(){return mp3File;}
 

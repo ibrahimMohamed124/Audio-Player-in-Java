@@ -68,7 +68,7 @@ public class MusicPlayer extends PlaybackListener {
 
      public void playCurrentSong() {
           try {
-               FileInputStream fis = new FileInputStream(currentSong.getFilePAth());
+               FileInputStream fis = new FileInputStream(currentSong.getFilePath());
                BufferedInputStream bis = new BufferedInputStream(fis);
 
                advancedPlayer = new AdvancedPlayer(bis);

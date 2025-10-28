@@ -6,10 +6,6 @@ public class App {
             @Override
             public void run() {
                 new MusicPlayerGUI().setVisible(true);
-
-//                System.out.println(song.getSongTitle());
-//                System.out.println(song.getSongArtist());
-
             }
         });
     }

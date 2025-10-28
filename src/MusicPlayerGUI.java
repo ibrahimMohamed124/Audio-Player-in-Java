@@ -1,51 +1,43 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Hashtable;
 
-// Using a modern Look and Feel (like "Nimbus" or "Metal" set at startup, though not required for the code itself)
+// 🎧 واجهة Music Player حديثة وجميلة
 public class MusicPlayerGUI extends JFrame {
 
-    // Define a darker, more modern color palette
-    public static final Color FRAME_BACKGROUND = new Color(20, 20, 25); // Very dark gray/black
-    public static final Color COMPONENT_BACKGROUND = new Color(30, 30, 35); // Slightly lighter for containers
-    public static final Color TEXT_COLOR = new Color(220, 220, 220); // Off-white
-    public static final Color TEXT_BLACK_COLOR = new Color(20, 20, 25); // Off-white
-    public static final Color ACCENT_COLOR = new Color(100, 180, 255); // Blue accent
+    public static final Color FRAME_BACKGROUND = new Color(20, 20, 25);
+    public static final Color COMPONENT_BACKGROUND = new Color(30, 30, 35);
+    public static final Color TEXT_COLOR = new Color(220, 220, 220);
+    public static final Color TEXT_BLACK_COLOR = new Color(20, 20, 25);
+    public static final Color ACCENT_COLOR = new Color(100, 180, 255);
 
     private final MusicPlayer musicPlayer;
     private final JFileChooser jFileChooser;
-    private JLabel songTitle, songArtist;
+    private JLabel songTitle, songArtist, songImage;
     private JPanel playbackBtns;
     private JSlider playbackSlider;
-    private JLabel labelCurrentTime, labelEnd; // Renamed for clarity in the class scope
-    private JLabel songImage; // get song image
+    private JLabel labelCurrentTime, labelEnd;
 
-    // Buttons Paths
     public String prevBtn = "src/assets/drive-download-20250713T123450Z-1-001/previous.png";
     public String playBtn = "src/assets/drive-download-20250713T123450Z-1-001/play.png";
     public String pauseBtn = "src/assets/drive-download-20250713T123450Z-1-001/pause.png";
     public String nextBtn = "src/assets/drive-download-20250713T123450Z-1-001/next.png";
 
-
-    // Assuming Song class is defined elsewhere
     public MusicPlayerGUI() {
         super("Modern Music Player 🎵");
-
-        // Basic frame setup
         setSize(400, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(true); // Allow resizing for a more modern feel
+        setResizable(true);
 
-        // Title  bar icon
         ImageIcon imageIcon = new ImageIcon("src/assets/images/modio1.png");
         setIconImage(imageIcon.getImage());
-        // Use BorderLayout for the main content pane
+
         setLayout(new BorderLayout());
         getContentPane().setBackground(FRAME_BACKGROUND);
 
@@ -54,20 +46,13 @@ public class MusicPlayerGUI extends JFrame {
         jFileChooser.setCurrentDirectory(new File("src/assets"));
         jFileChooser.setFileFilter(new FileNameExtensionFilter("MP3 Files", "mp3"));
 
-        // Setup key bindings before adding components
         setupKeyBindings();
-
         addGUIComponents();
     }
 
     private void addGUIComponents() {
-        // 1. TOP: Tool Bar (File/Load)
         addToolBar();
-
-        // 2. CENTER: Main Content (Image, Title, Artist)
         addCenterContent();
-
-        // 3. SOUTH: Playback Controls (Slider, Buttons)
         addPlaybackControls();
     }
 
@@ -78,23 +63,14 @@ public class MusicPlayerGUI extends JFrame {
         JMenu songMenu = new JMenu("Song");
         songMenu.setForeground(TEXT_COLOR);
 
-        // Load Song Item
         JMenuItem loadSong = new JMenuItem("Load Song");
         loadSong.setForeground(TEXT_BLACK_COLOR);
-        loadSong.addActionListener(e -> { // Using lambda for concise action listener
+        loadSong.addActionListener(e -> {
             int result = jFileChooser.showOpenDialog(MusicPlayerGUI.this);
             File selectedFile = jFileChooser.getSelectedFile();
-
             if (result == JFileChooser.APPROVE_OPTION && selectedFile != null) {
-                // --- THIS IS THE CRITICAL SECTION TO ENSURE EXECUTION ---
-
-                // 1. Create the Song object
                 Song song = new Song(selectedFile.getPath());
-
-                // 2. Load the song into the player (which also calls playCurrentSong())
                 musicPlayer.loadSong(song);
-
-                // 3. Update the UI elements
                 updateSongTitleAndArtist(song);
                 updatePlaybackSlider(song);
                 enablePauseButtonDisablePlayButton();
@@ -102,14 +78,9 @@ public class MusicPlayerGUI extends JFrame {
         });
         songMenu.add(loadSong);
 
-        // Simple Playlist Menu (keeping structure but simplifying implementation)
         JMenu playlistMenu = new JMenu("Playlist");
         playlistMenu.setForeground(TEXT_COLOR);
 
-        menuBar.add(songMenu);
-        menuBar.add(playlistMenu);
-
-        // addToolBar()
         JMenuItem createPlaylist = new JMenuItem("Create Playlist");
         createPlaylist.addActionListener(e -> new PlaylistUI().setVisible(true));
 
@@ -119,39 +90,34 @@ public class MusicPlayerGUI extends JFrame {
         playlistMenu.add(createPlaylist);
         playlistMenu.add(loadPlaylist);
 
-        // Add the menu bar to the top (North) of the frame
+        menuBar.add(songMenu);
+        menuBar.add(playlistMenu);
+
         setJMenuBar(menuBar);
     }
 
     private void addCenterContent() {
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridBagLayout()); // Use GridBagLayout for flexible centering
+        JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setBackground(FRAME_BACKGROUND);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 0, 10, 0); // Padding
+        gbc.insets = new Insets(10, 0, 10, 0);
 
-        // 1. Song Image (Album Art)
-// نحفظه كمتحول عضو علشان نقدر نحدثه
         songImage = new JLabel();
         songImage.setPreferredSize(new Dimension(250, 250));
         songImage.setHorizontalAlignment(SwingConstants.CENTER);
-        songImage.setVerticalAlignment(SwingConstants.CENTER);
         songImage.setIcon(loadImage("src/assets/drive-download-20250713T123450Z-1-001/record.png"));
-        songImage.setPreferredSize(new Dimension(250, 250)); // Set a preferred size for the image
         gbc.gridx = 0;
         gbc.gridy = 0;
         centerPanel.add(songImage, gbc);
 
-        // 2. Song Title
         songTitle = new JLabel("Song Title");
-        songTitle.setFont(new Font("Dialog", Font.BOLD, 28)); // Slightly larger font
-        songTitle.setForeground(ACCENT_COLOR); // Use accent color for title
+        songTitle.setFont(new Font("Dialog", Font.BOLD, 28));
+        songTitle.setForeground(ACCENT_COLOR);
         songTitle.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 1;
         centerPanel.add(songTitle, gbc);
 
-        // 3. Song Artist
         songArtist = new JLabel("Artist Name");
         songArtist.setFont(new Font("Dialog", Font.PLAIN, 20));
         songArtist.setForeground(TEXT_COLOR);
@@ -164,21 +130,51 @@ public class MusicPlayerGUI extends JFrame {
 
     private void addPlaybackControls() {
         JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS)); // Vertical stack
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
         controlPanel.setBackground(COMPONENT_BACKGROUND);
 
-        // 1. Playback Slider with Time Labels
+        // === Modern Custom Slider ===
         playbackSlider = new JSlider(0, 100, 0);
-        playbackSlider.setBackground(COMPONENT_BACKGROUND);
-        playbackSlider.setForeground(ACCENT_COLOR);
-        playbackSlider.setMajorTickSpacing(100);
-        playbackSlider.setPaintTrack(true);
-        playbackSlider.setPaintTicks(false);
-        // Remove the default labels until a song is loaded, but keep space
-        playbackSlider.setPaintLabels(false);
-        playbackSlider.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));
+        playbackSlider.setOpaque(false);
+        playbackSlider.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
+        playbackSlider.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        playbackSlider.setFocusable(false);
 
-        // Time labels panel for alignment
+        playbackSlider.setUI(new BasicSliderUI(playbackSlider) {
+            @Override
+            public void paintTrack(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int trackY = trackRect.y + (trackRect.height / 2) - 3;
+                int trackWidth = trackRect.width;
+
+                g2.setColor(new Color(45, 45, 50));
+                g2.fillRoundRect(trackRect.x, trackY, trackWidth, 6, 6, 6);
+
+                float progress = (float) playbackSlider.getValue() / playbackSlider.getMaximum();
+                int filledWidth = (int) (trackWidth * progress);
+                GradientPaint gradient = new GradientPaint(0, 0, new Color(100, 180, 255),
+                        trackWidth, 0, new Color(60, 130, 250));
+                g2.setPaint(gradient);
+                g2.fillRoundRect(trackRect.x, trackY, filledWidth, 6, 6, 6);
+            }
+
+            @Override
+            public void paintThumb(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int thumbX = thumbRect.x + (thumbRect.width / 2) - 7;
+                int thumbY = thumbRect.y + (thumbRect.height / 2) - 7;
+
+                g2.setColor(new Color(100, 180, 255));
+                g2.fillOval(thumbX, thumbY, 14, 14);
+
+                g2.setColor(new Color(0, 0, 0, 100));
+                g2.drawOval(thumbX, thumbY, 14, 14);
+            }
+        });
+
         JPanel timePanel = new JPanel(new BorderLayout());
         timePanel.setBackground(COMPONENT_BACKGROUND);
         timePanel.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 25));
@@ -193,65 +189,50 @@ public class MusicPlayerGUI extends JFrame {
         labelEnd.setForeground(TEXT_COLOR);
         timePanel.add(labelEnd, BorderLayout.EAST);
 
-
-        // 2. Playback Buttons
-        playbackBtns = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 5)); // Spacing between buttons
+        playbackBtns = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 5));
         playbackBtns.setBackground(COMPONENT_BACKGROUND);
 
-        // Reusing original button setup logic but with modern styling
         JButton previousBtn = createStyledButton(prevBtn);
         JButton playButton = createStyledButton(playBtn);
         JButton pauseButton = createStyledButton(pauseBtn);
         JButton nextButton = createStyledButton(nextBtn);
 
-        // Action Listeners
         playButton.addActionListener(e -> {
             enablePauseButtonDisablePlayButton();
             musicPlayer.playCurrentSong();
         });
-
         pauseButton.addActionListener(e -> {
             enablePlayButtonDisablePauseButton();
             musicPlayer.pauseSong();
         });
-        pauseButton.setVisible(false); // Start with play button visible
+        pauseButton.setVisible(false);
 
         playbackBtns.add(previousBtn);
         playbackBtns.add(playButton);
         playbackBtns.add(pauseButton);
         playbackBtns.add(nextButton);
 
-        // Add components to the main control panel
         controlPanel.add(playbackSlider);
         controlPanel.add(timePanel);
         controlPanel.add(playbackBtns);
-
         add(controlPanel, BorderLayout.SOUTH);
     }
 
-    /**
-     * Helper method to create styled buttons for playback controls.
-     */
     private JButton createStyledButton(String imagePath) {
         JButton button = new JButton(loadImage(imagePath));
         button.setBorderPainted(false);
         button.setFocusPainted(false);
-        button.setContentAreaFilled(false); // Make button transparent
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Indicate it's clickable
-        // Added a Rollover effect for modernity (optional, but nice)
-        button.setRolloverIcon(loadImage(imagePath, 1.1f)); // 10% larger on hover
+        button.setContentAreaFilled(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setRolloverIcon(loadImage(imagePath, 1.1f));
         return button;
     }
-
-
-    // --- UTILITY METHODS (Slightly Refined) ---
 
     public void setPlaybackSliderValue(int frame) {
         playbackSlider.setValue(frame);
     }
 
     public void updateCurrentTimeLabel(int frame, double frameRatePerMs) {
-        // Only update if labelEnd has a valid text (i.e., song is loaded)
         if (labelEnd != null && !labelEnd.getText().equals("00:00")) {
             int currentTimeInMs = (int) (frame / frameRatePerMs);
             int minutes = (currentTimeInMs / 1000) / 60;
@@ -263,32 +244,22 @@ public class MusicPlayerGUI extends JFrame {
     void updateSongTitleAndArtist(Song song) {
         songTitle.setText(song.getSongTitle());
         songArtist.setText(song.getSongArtist());
-
-        // عرض صورة الألبوم إن وُجدت
         if (song.getAlbumArt() != null) {
             Image scaled = song.getAlbumArt().getScaledInstance(250, 250, Image.SCALE_SMOOTH);
             songImage.setIcon(new ImageIcon(scaled));
         } else {
-            // fallback إلى الصورة الافتراضية
             songImage.setIcon(loadImage("src/assets/drive-download-20250713T123450Z-1-001/record.png"));
         }
     }
 
-
     void updatePlaybackSlider(Song song) {
-        // Set Max and ensure labels are painted
         playbackSlider.setMaximum(song.getMp3File().getFrameCount());
-        playbackSlider.setPaintLabels(false); // We are using separate labels (labelCurrentTime, labelEnd) now
-
-        // Update the end time label
         labelEnd.setText(song.getSongLength());
     }
 
     private void enablePauseButtonDisablePlayButton() {
-        // Assumes order: previous, play, pause, next
         JButton playButton = (JButton) playbackBtns.getComponent(1);
         JButton pauseButton = (JButton) playbackBtns.getComponent(2);
-
         playButton.setVisible(false);
         pauseButton.setVisible(true);
     }
@@ -296,17 +267,14 @@ public class MusicPlayerGUI extends JFrame {
     private void enablePlayButtonDisablePauseButton() {
         JButton playButton = (JButton) playbackBtns.getComponent(1);
         JButton pauseButton = (JButton) playbackBtns.getComponent(2);
-
         playButton.setVisible(true);
         pauseButton.setVisible(false);
     }
 
     private void setupKeyBindings() {
-        // Keep the original key binding logic
         JComponent contentPane = (JComponent) this.getContentPane();
         InputMap inputMap = contentPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = contentPane.getActionMap();
-
         inputMap.put(KeyStroke.getKeyStroke("SPACE"), "togglePlayPause");
 
         actionMap.put("togglePlayPause", new AbstractAction() {
@@ -323,24 +291,15 @@ public class MusicPlayerGUI extends JFrame {
         });
     }
 
-    /**
-     * Loads and resizes an image icon.
-     * @param imagePath The path to the image file.
-     * @param scaleFactor Factor to scale the image (e.g., 1.0 for original, 1.1 for 10% larger)
-     */
     private ImageIcon loadImage(String imagePath, float scaleFactor) {
         try {
             BufferedImage image = ImageIO.read(new File(imagePath));
-            if (image == null) return null;
-
             int newWidth = (int) (image.getWidth() * scaleFactor);
             int newHeight = (int) (image.getHeight() * scaleFactor);
-
             Image scaledImage = image.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
             return new ImageIcon(scaledImage);
         } catch (Exception e) {
             System.err.println("Error loading image: " + imagePath);
-            // e.printStackTrace(); // Uncomment for full error trace
         }
         return null;
     }
@@ -350,7 +309,6 @@ public class MusicPlayerGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        // Optionally set a modern Look and Feel (e.g., Nimbus) for a better default look
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -358,13 +316,9 @@ public class MusicPlayerGUI extends JFrame {
                     break;
                 }
             }
-        } catch (Exception e) {
-            // If Nimbus is not available, fall back to the default Metal L&F or do nothing
+        } catch (Exception ignored) {
         }
 
-        // Running the GUI on the Event Dispatch Thread (standard Swing practice)
-        SwingUtilities.invokeLater(() -> {
-            new MusicPlayerGUI().setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new MusicPlayerGUI().setVisible(true));
     }
 }
