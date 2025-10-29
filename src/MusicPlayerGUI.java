@@ -47,6 +47,8 @@ public class MusicPlayerGUI extends JFrame {
         jFileChooser.setFileFilter(new FileNameExtensionFilter("MP3 Files", "mp3"));
 
         setupKeyBindings();
+        setFocusable(true);
+        requestFocusInWindow();
         addGUIComponents();
     }
 
@@ -57,15 +59,36 @@ public class MusicPlayerGUI extends JFrame {
     }
 
     private void addToolBar() {
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.setBackground(COMPONENT_BACKGROUND);
+        JMenuBar menuBar = new JMenuBar() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        JMenu songMenu = new JMenu("Song");
-        songMenu.setForeground(TEXT_COLOR);
+                // 🎨 تدرج لوني ناعم للـMenuBar
+                GradientPaint gradient = new GradientPaint(
+                        0, 0, new Color(28, 28, 33),
+                        0, getHeight(), new Color(22, 22, 27)
+                );
+                g2.setPaint(gradient);
+                g2.fillRect(0, 0, getWidth(), getHeight());
 
-        JMenuItem loadSong = new JMenuItem("Load Song");
-        loadSong.setForeground(TEXT_BLACK_COLOR);
-        loadSong.addActionListener(e -> {
+                // 🌫️ ظل خفيف أسفل القائمة
+                g2.setColor(new Color(0, 0, 0, 100));
+                g2.fillRect(0, getHeight() - 2, getWidth(), 2);
+                g2.setColor(new Color(0, 0, 0, 40));
+                g2.fillRect(0, getHeight() - 3, getWidth(), 1);
+            }
+        };
+
+        menuBar.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        menuBar.setOpaque(false);
+
+        // === إنشاء القوائم ===
+        JMenu songMenu = createStyledMenu("🎵 Song");
+        JMenu playlistMenu = createStyledMenu("📂 Playlist");
+
+        JMenuItem loadSong = createStyledMenuItem("🎧 Load Song", e -> {
             int result = jFileChooser.showOpenDialog(MusicPlayerGUI.this);
             File selectedFile = jFileChooser.getSelectedFile();
             if (result == JFileChooser.APPROVE_OPTION && selectedFile != null) {
@@ -76,17 +99,11 @@ public class MusicPlayerGUI extends JFrame {
                 enablePauseButtonDisablePlayButton();
             }
         });
+
+        JMenuItem createPlaylist = createStyledMenuItem("➕ Create Playlist", e -> new PlaylistUI().setVisible(true));
+        JMenuItem loadPlaylist = createStyledMenuItem("📁 Load Playlist", e -> new PlaylistUI().setVisible(true));
+
         songMenu.add(loadSong);
-
-        JMenu playlistMenu = new JMenu("Playlist");
-        playlistMenu.setForeground(TEXT_COLOR);
-
-        JMenuItem createPlaylist = new JMenuItem("Create Playlist");
-        createPlaylist.addActionListener(e -> new PlaylistUI().setVisible(true));
-
-        JMenuItem loadPlaylist = new JMenuItem("Load Playlist");
-        loadPlaylist.addActionListener(e -> new PlaylistUI().setVisible(true));
-
         playlistMenu.add(createPlaylist);
         playlistMenu.add(loadPlaylist);
 
@@ -95,6 +112,54 @@ public class MusicPlayerGUI extends JFrame {
 
         setJMenuBar(menuBar);
     }
+
+
+    private JMenu createStyledMenu(String title) {
+        JMenu menu = new JMenu(title);
+        menu.setForeground(TEXT_COLOR);
+        menu.setFont(new Font("Dialog", Font.BOLD, 14));
+        menu.setOpaque(false);
+        menu.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+
+        // تأثير hover جميل
+        menu.addChangeListener(e -> {
+            if (menu.isSelected()) {
+                menu.setForeground(ACCENT_COLOR);
+            } else {
+                menu.setForeground(TEXT_COLOR);
+            }
+        });
+
+        return menu;
+    }
+
+    private JMenuItem createStyledMenuItem(String text, java.awt.event.ActionListener listener) {
+        JMenuItem item = new JMenuItem(text);
+        item.setForeground(TEXT_COLOR);
+        item.setFont(new Font("Dialog", Font.PLAIN, 13));
+        item.setBackground(COMPONENT_BACKGROUND);
+        item.setOpaque(true);
+        item.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+        item.addActionListener(listener);
+
+        // Hover Effect
+        item.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                item.setBackground(ACCENT_COLOR);
+                item.setForeground(TEXT_BLACK_COLOR);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                item.setBackground(COMPONENT_BACKGROUND);
+                item.setForeground(TEXT_COLOR);
+            }
+        });
+
+        return item;
+    }
+
 
     private void addCenterContent() {
         JPanel centerPanel = new JPanel(new GridBagLayout());
