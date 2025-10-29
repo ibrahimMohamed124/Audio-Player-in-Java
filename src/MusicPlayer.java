@@ -35,7 +35,6 @@ public class MusicPlayer extends PlaybackListener {
           }
      }
 
-
      public void loadSong(Song song) {
           stopSong();
           currentSong = song;
@@ -89,6 +88,36 @@ public class MusicPlayer extends PlaybackListener {
                musicPlayerGUI.updateSongTitleAndArtist(currentSong);
                musicPlayerGUI.updatePlaybackSlider(currentSong);
 
+          } catch (Exception e) {
+               e.printStackTrace();
+          }
+     }
+
+     // ✅ الدالة الجديدة للانتقال إلى مكان معين في الأغنية
+     public void seekToFrame(int frame) {
+          try {
+               if (currentSong == null) return;
+
+               stopSong(); // نوقف الأغنية الحالية
+               currentFrame = frame; // نحدث الإطار الجديد
+
+               FileInputStream fis = new FileInputStream(currentSong.getFilePath());
+               BufferedInputStream bis = new BufferedInputStream(fis);
+               advancedPlayer = new AdvancedPlayer(bis);
+               advancedPlayer.setPlayBackListener(this);
+
+               musicThread = new Thread(() -> {
+                    try {
+                         isPlaying = true;
+                         isPaused = false;
+                         advancedPlayer.play(currentFrame, totalFrames);
+                    } catch (Exception e) {
+                         e.printStackTrace();
+                    }
+               });
+               musicThread.start();
+
+               startPlaybackSliderThread();
           } catch (Exception e) {
                e.printStackTrace();
           }

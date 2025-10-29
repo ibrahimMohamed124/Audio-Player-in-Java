@@ -139,6 +139,22 @@ public class MusicPlayerGUI extends JFrame {
         playbackSlider.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
         playbackSlider.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         playbackSlider.setFocusable(false);
+        // 🎵 Draggable JSlider
+        playbackSlider.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                if (musicPlayer.isPlaying()) {
+                    musicPlayer.pauseSong(); // نوقف مؤقتًا
+                }
+            }
+
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+                int newFrame = playbackSlider.getValue();
+                musicPlayer.seekToFrame(newFrame); // نبدأ من الموضع الجديد
+                enablePauseButtonDisablePlayButton();
+            }
+        });
 
         playbackSlider.setUI(new BasicSliderUI(playbackSlider) {
             @Override
